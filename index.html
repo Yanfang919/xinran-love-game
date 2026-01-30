@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <title>赵欣然宝宝的专属爱心游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+        body {
+            font-family: "Microsoft YaHei", 微软雅黑, sans-serif;
+            background: #ffe6ea;
+            overflow: hidden;
+            height: 100vh;
+        }
+        /* 启动页 */
+        .start-page {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .start-title {
+            font-size: 24px;
+            color: #e63946;
+            line-height: 1.8;
+            margin-bottom: 50px;
+            font-weight: bold;
+        }
+        .start-btn {
+            width: 200px;
+            height: 60px;
+            background: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+        }
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+        /* 游戏页 */
+        .game-page {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+        /* 游戏信息栏 + 历史记录按钮 */
+        .game-header {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 999;
+        }
+        .game-info {
+            display: flex;
+            gap: 15px;
+        }
+        .info-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #e63946;
+        }
+        /* 历史记录按钮 */
+        .record-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #e63946;
+            cursor: pointer;
+        }
+        /* 历史记录弹窗 */
+        .record-modal {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 250px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .record-modal-title {
+            font-size: 18px;
+            color: #e63946;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .record-item {
+            font-size: 14px;
+            color: #333;
+            padding: 5px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .record-empty {
+            font-size: 14px;
+            color: #999;
+            text-align: center;
+            padding: 10px 0;
+        }
+        /* 爱心样式 */
+        .heart {
+            position: absolute;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e63946'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center;
+            background-size: 100% 100%;
+            cursor: pointer;
+            animation: bounce 2s infinite alternate;
+            z-index: 99;
+        }
+        .heart-small { width: 40px; height: 40px; }
+        .heart-big { width: 80px; height: 80px; }
+        @keyframes bounce {
+            from {transform: translateY(0);}
+            to {transform: translateY(-20px);}
+        }
+        /* 结束页 */
+        .end-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        .end-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+        /* 破纪录提示 */
+        .record-tip {
+            font-size: 22px;
+            color: #ff69b4;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .end-score {
+            font-size: 20px;
+            line-height: 1.8;
+        }
+        .restart-btn {
+            margin-top: 30px;
+            width: 180px;
+            height: 50px;
+            background: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <!-- 启动页 -->
+    <div class="start-page" id="startPage">
+        <div class="start-title">赵欣然宝宝，<br>这是我为你做的专属小游戏</div>
+        <button class="start-btn" id="startBtn">点击开始游戏</button>
+    </div>
+
+    <!-- 游戏页 -->
+    <div class="game-page" id="gamePage">
+        <div class="game-header">
+            <div class="game-info">
+                <div class="info-item">得分：<span id="score">0</span></div>
+                <div class="info-item">倒计时：<span id="countDown">60</span>秒</div>
+                <div class="info-item">最高分：<span id="maxScore">0</span></div>
+            </div>
+            <button class="record-btn" id="recordBtn">历史记录</button>
+        </div>
+        <!-- 历史记录弹窗 -->
+        <div class="record-modal" id="recordModal">
+            <div class="record-modal-title">游玩历史</div>
+            <div id="recordList"></div>
+        </div>
+    </div>
+
+    <!-- 结束页 -->
+    <div class="end-page" id="endPage">
+        <div class="end-title">游戏结束啦</div>
+        <div class="record-tip" id="recordTip"></div>
+        <div class="end-score">本次得分：<span id="finalScore">0</span></div>
+        <div class="end-score">历史最高分：<span id="finalMaxScore">0</span></div>
+        <button class="restart-btn" id="restartBtn">再来一局</button>
+    </div>
+
+    <script>
+        // DOM元素
+        const startPage = document.getElementById('startPage');
+        const gamePage = document.getElementById('gamePage');
+        const endPage = document.getElementById('endPage');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const scoreEle = document.getElementById('score');
+        const countDownEle = document.getElementById('countDown');
+        const maxScoreEle = document.getElementById('maxScore');
+        const finalScoreEle = document.getElementById('finalScore');
+        const finalMaxScoreEle = document.getElementById('finalMaxScore');
+        const recordTip = document.getElementById('recordTip');
+        const recordBtn = document.getElementById('recordBtn');
+        const recordModal = document.getElementById('recordModal');
+        const recordList = document.getElementById('recordList');
+
+        // 全局变量
+        let score = 0;
+        let maxScore = localStorage.getItem('heartGameMaxScore') || 0;
+        let historyRecords = JSON.parse(localStorage.getItem('heartGameHistory')) || [];
+        let countDown = 60;
+        let timer = null;
+        let heartTimer = null;
+        let isGameRunning = false;
+
+        // 初始化
+        maxScoreEle.innerText = maxScore;
+        renderHistoryRecords();
+
+        // 事件绑定
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', restartGame);
+        recordBtn.addEventListener('click', toggleRecordModal);
+
+        // 开始游戏
+        function startGame() {
+            startPage.style.display = 'none';
+            gamePage.style.display = 'block';
+            score = 0;
+            countDown = 60;
+            scoreEle.innerText = 0;
+            countDownEle.innerText = 60;
+            isGameRunning = true;
+            startCountDown();
+            startCreateHeart();
+        }
+
+        // 重启游戏
+        function restartGame() {
+            endPage.style.display = 'none';
+            startGame();
+        }
+
+        // 倒计时
+        function startCountDown() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                countDown--;
+                countDownEle.innerText = countDown;
+                if (countDown <= 0) {
+                    clearInterval(timer);
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        // 生成爱心
+        function startCreateHeart() {
+            clearInterval(heartTimer);
+            heartTimer = setInterval(() => {
+                if (!isGameRunning) return;
+                createHeart();
+            }, 500);
+        }
+
+        // 创建单个爱心
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            const isBig = Math.random() > 0.7;
+            if (isBig) {
+                heart.className += ' heart-big';
+                heart.dataset.score = 5;
+            } else {
+                heart.className += ' heart-small';
+                heart.dataset.score = 1;
+            }
+            // 随机位置（避免出界）
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const left = Math.random() * (screenWidth - heart.offsetWidth) + heart.offsetWidth / 2;
+            const top = Math.random() * (screenHeight - heart.offsetHeight - 80) + 80;
+            heart.style.left = `${left}px`;
+            heart.style.top = `${top}px`;
+            // 点击计分
+            heart.addEventListener('click', () => {
+                score += Number(heart.dataset.score);
+                scoreEle.innerText = score;
+                heart.remove();
+            });
+            gamePage.appendChild(heart);
+            // 1.5秒未点击自动消失
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
+        }
+
+        // 游戏结束核心逻辑：保存记录+判断破纪录
+        function gameOver() {
+            isGameRunning = false;
+            clearInterval(heartTimer);
+            // 清除剩余爱心
+            document.querySelectorAll('.heart').forEach(h => h.remove());
+            
+            // 1. 保存本次记录到历史记录
+            const now = new Date();
+            const timeStr = `${now.getMonth()+1}月${now.getDate()}日 ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            const newRecord = { time: timeStr, score: score };
+            historyRecords.unshift(newRecord); // 最新记录放前面
+            localStorage.setItem('heartGameHistory', JSON.stringify(historyRecords));
+
+            // 2. 判断是否破纪录
+            let isNewRecord = false;
+            if (score > maxScore) {
+                isNewRecord = true;
+                maxScore = score;
+                localStorage.setItem('heartGameMaxScore', maxScore);
+                maxScoreEle.innerText = maxScore;
+            }
+
+            // 3. 更新结束页信息
+            finalScoreEle.innerText = score;
+            finalMaxScoreEle.innerText = maxScore;
+            // 显示破纪录提示或隐藏
+            if (isNewRecord) {
+                recordTip.innerText = '恭喜您破新纪录，奖励吃个嘴子😘';
+                recordTip.style.display = 'block';
+            } else {
+                recordTip.style.display = 'none';
+            }
+            endPage.style.display = 'flex';
+        }
+
+        // 切换历史记录弹窗显示/隐藏
+        function toggleRecordModal() {
+            if (recordModal.style.display === 'block') {
+                recordModal.style.display = 'none';
+            } else {
+                renderHistoryRecords();
+                recordModal.style.display = 'block';
+            }
+        }
+
+        // 渲染历史记录列表
+        function renderHistoryRecords() {
+            if (historyRecords.length === 0) {
+                recordList.innerHTML = '<div class="record-empty">暂无游玩记录</div>';
+                return;
+            }
+            let html = '';
+            historyRecords.forEach((item, index) => {
+                html += `<div class="record-item">第${index+1}次 · ${item.time} · 得分${item.score}</div>`;
+            });
+            recordList.innerHTML = html;
+        }
+
+        // 点击空白处关闭历史记录弹窗
+        document.addEventListener('click', (e) => {
+            if (!recordModal.contains(e.target) && e.target !== recordBtn) {
+                recordModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
